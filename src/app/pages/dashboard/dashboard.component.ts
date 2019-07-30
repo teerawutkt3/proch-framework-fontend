@@ -8,6 +8,8 @@ import {
   chartExample1,
   chartExample2
 } from "../../variables/charts";
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { AjaxService } from 'src/app/common/service/ajax-service';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,8 +23,11 @@ export class DashboardComponent implements OnInit {
   public salesChart;
   public clicked: boolean = true;
   public clicked1: boolean = false;
+  constructor(
+    private http: HttpClient,
+    private ajax: AjaxService
 
-  constructor() { }
+  ) { }
 
   ngOnInit() {
 
@@ -47,13 +52,19 @@ export class DashboardComponent implements OnInit {
     var chartSales = document.getElementById('chart-sales');
 
     this.salesChart = new Chart(chartSales, {
-			type: 'line',
-			options: chartExample1.options,
-			data: chartExample1.data
-		});
+      type: 'line',
+      options: chartExample1.options,
+      data: chartExample1.data
+    });
   }
 
-
+  test() {
+    return this.ajax.doPost(`/user/test`, {}).subscribe(res=>{
+      console.log('res', res)
+    },error=>{
+      console.log('error', error)
+    });
+  }
 
 
 

@@ -10,6 +10,7 @@ import { RegisterComponent } from '../../pages/register/register.component';
 @NgModule({
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     RouterModule.forChild(AuthLayoutRoutes),
     FormsModule
     // NgbModule
