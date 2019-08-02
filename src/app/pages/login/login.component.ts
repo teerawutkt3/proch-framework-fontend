@@ -1,6 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AjaxService } from 'src/app/common/service/ajax-service';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { AuthService } from 'src/app/common/service/auth-service';
+import { HttpParams } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -11,7 +13,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   formGroup: FormGroup
   constructor(
-    private ajax: AjaxService,
+    private auth: AuthService,
     private formBuilder: FormBuilder
   ) {
     this.formGroup = this.formBuilder.group({
@@ -26,6 +28,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   login() {
-    console.log('formGroup: ', this.formGroup.value)
+    console.log('login...')
+    this.auth.login(this.formGroup.value)
   }
 }

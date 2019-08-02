@@ -13,17 +13,26 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AppRoutingModule } from './app.routing';
 import { ComponentsModule } from './components/components.module';
 import { AjaxService } from './common/service/ajax-service';
-
+import { AuthService } from './common/service/auth-service';
+import { HttpModule } from '@angular/http';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { StoreModule } from '@ngrx/store';
+import { reducers } from './store/reducers/reducer';
 
 @NgModule({
   imports: [
     BrowserAnimationsModule,
     FormsModule,
     HttpClientModule,
+    HttpModule,
     ComponentsModule,
     NgbModule,
     RouterModule,
-    AppRoutingModule
+    AppRoutingModule,
+    StoreModule.forRoot(reducers),
+    StoreDevtoolsModule.instrument({
+      maxAge: 25, // Retains last 25 states      
+    }),
   ],
   declarations: [
     AppComponent,
@@ -31,7 +40,8 @@ import { AjaxService } from './common/service/ajax-service';
     AuthLayoutComponent
   ],
   providers: [
-    AjaxService
+    AjaxService,
+    AuthService
   ],
   bootstrap: [AppComponent]
 })

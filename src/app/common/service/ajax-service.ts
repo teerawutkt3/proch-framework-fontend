@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 import { empty } from 'rxjs';
-const host = "http://localhost:8080";
+import { Store } from '@ngrx/store';
+
+
 @Injectable()
 export class AjaxService {
 
@@ -12,65 +14,68 @@ export class AjaxService {
     public static FORM_HEADER = new Headers({
         "Content-Type": "application/x-www-form-urlencoded"
     });
+    public static HOST = "http://localhost:8080";
     public static CONTEXT_PATH = "/api";
     public static CONTEXT_PATH_LOGIN = "/login";
     public static CONTEXT_PATH_LOGOUT = "/logout";
     public static isDebug = true;
 
+    httpOptions: any;
     constructor(
         private httpClient: HttpClient,
-    ) { }
+        private store: Store<any>
+    ) {
+    }
+
+    getToken() {
+        this.httpOptions = {
+            headers: new HttpHeaders({
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            })
+        };
+    }
 
     doPost(url: string, body: any) {
+
+        this.getToken();
+
         if (AjaxService.isDebug) {
-            console.log("URL : ", host + AjaxService.CONTEXT_PATH + url);
+            console.log("URL : ", AjaxService.HOST + AjaxService.CONTEXT_PATH + url);
             console.log("Params : ", body);
         }
-        return this.httpClient.post(host + AjaxService.CONTEXT_PATH + url, body).pipe(
-            map((response: any) => {
-                return response;
-            }),
-            catchError((err, caught) => {
-                if (err.status == 401 && "security/user-profile" != url) {
-                    window.location.reload();
-                    if (AjaxService.isDebug) {
-                        console.error("Redirect to LoginPage");
-                    }
-                } else {
-                    // if ("security/user-profile" == url) {
-                    //     this.router.navigate(["/login"]);
-                    // }
-                    if (err.status != 401) {
-                        console.error("Message Error => ", err, caught);
-                    }
-                }
-                return empty();
-            })
-        );
-    }
-    doGet(url: string) {
-        if (AjaxService.isDebug) {
-            console.log("URL : ", host + AjaxService.CONTEXT_PATH + url);
-        }
-        // return this.httpClient.get(host + AjaxService.CONTEXT_PATH + url).subscribe((data:any)=>{
-        //     console.log('data', data);
-        // },error=>{
-        //     console.log('error', error);
-        // })
-        return this.httpClient.get(host + AjaxService.CONTEXT_PATH + url).pipe(
+        return this.httpClient.post(AjaxService.HOST + AjaxService.CONTEXT_PATH + url, body, this.httpOptions).pipe(
             map((response: any) => {
                 return response;
             }),
             catchError(this.doHandleError)
         );
     }
+    doGet(url: string) {
+
+        this.getToken();
+
+        if (AjaxService.isDebug) {
+            console.log("URL : ", AjaxService.HOST + AjaxService.CONTEXT_PATH + url);
+        }
+        return this.httpClient.get(AjaxService.HOST + AjaxService.CONTEXT_PATH + url, this.httpOptions).pipe(
+            map((response: any) => {
+                return response;
+            }),
+            catchError(this.doHandleError)
+        );
+
+    }
 
     doPut(url: string, body: any) {
+
+        this.getToken();
+
         if (AjaxService.isDebug) {
-            console.log("URL : ", host + AjaxService.CONTEXT_PATH + url);
+            console.log("URL : ", AjaxService.HOST + AjaxService.CONTEXT_PATH + url);
             console.log("Params : ", body);
         }
-        return this.httpClient.put(host + AjaxService.CONTEXT_PATH + url, body).pipe(
+        return this.httpClient.put(AjaxService.HOST + AjaxService.CONTEXT_PATH + url, body).pipe(
             map((response: any) => {
                 return response;
             }),
@@ -79,35 +84,38 @@ export class AjaxService {
     }
 
     doDelete(url: string) {
+
+        this.getToken();
+        
         if (AjaxService.isDebug) {
-            console.log("URL : ", host + AjaxService.CONTEXT_PATH + url);
+            console.log("URL : ", AjaxService.HOST + AjaxService.CONTEXT_PATH + url);
         }
-        return this.httpClient.delete(host + AjaxService.CONTEXT_PATH + url).pipe(
+        return this.httpClient.delete(AjaxService.HOST + AjaxService.CONTEXT_PATH + url).pipe(
             map((response: any) => {
                 return response;
             }),
             catchError(this.doHandleError)
         );
     }
-    private doHandleError(err, caught) {
+
+    private doHandleError(err) {
         console.log('err: ', err)
         if (err.status == 401) {
             // window.location.reload();
             if (AjaxService.isDebug) {
                 console.error("Error 401 ", err);
             }
-        } else if (err.status = 415) {
+        } else if (err.status == 415) {
             if (AjaxService.isDebug) {
                 console.error("Error 415 ", err);
             }
-        } else if (err.status = 500) {
+        } else if (err.status == 500) {
             if (AjaxService.isDebug) {
                 console.error("Error 500 ", err);
             }
         } else {
             if (AjaxService.isDebug) {
-                console.log('Error', AjaxService.isDebug)
-                console.error("Message Error => ", caught);
+                console.error("Message Error => ", err);
             }
         }
         return empty();

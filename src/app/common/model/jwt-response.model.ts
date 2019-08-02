@@ -1,0 +1,3 @@
+interface JwtReponseModel {
+    token:string;
+}
