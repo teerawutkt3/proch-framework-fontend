@@ -15,19 +15,19 @@ export class AjaxService {
         "Content-Type": "application/x-www-form-urlencoded"
     });
     public static HOST = "http://localhost:8080";
-    public static CONTEXT_PATH = "/api";
-    public static CONTEXT_PATH_LOGIN = "/login";
-    public static CONTEXT_PATH_LOGOUT = "/logout";
+    public static PATH = "/api";
+    public static CONTEXT_PATH = AjaxService.HOST + AjaxService.PATH;
+    public static CONTEXT_PATH_LOGOUT = AjaxService.HOST + "/logout";
     public static isDebug = true;
 
-    httpOptions: any;
+    private httpOptions: any;
     constructor(
         private httpClient: HttpClient,
         private store: Store<any>
     ) {
     }
 
-    getToken() {
+    private getToken() {
         this.httpOptions = {
             headers: new HttpHeaders({
                 'Content-Type': 'application/json',
@@ -41,10 +41,10 @@ export class AjaxService {
         this.getToken();
 
         if (AjaxService.isDebug) {
-            console.log("URL : ", AjaxService.HOST + AjaxService.CONTEXT_PATH + url);
+            console.log("URL : ", AjaxService.CONTEXT_PATH + url);
             console.log("Params : ", body);
         }
-        return this.httpClient.post(AjaxService.HOST + AjaxService.CONTEXT_PATH + url, body, this.httpOptions).pipe(
+        return this.httpClient.post(AjaxService.CONTEXT_PATH + url, body, this.httpOptions).pipe(
             map((response: any) => {
                 return response;
             }),
@@ -56,9 +56,9 @@ export class AjaxService {
         this.getToken();
 
         if (AjaxService.isDebug) {
-            console.log("URL : ", AjaxService.HOST + AjaxService.CONTEXT_PATH + url);
+            console.log("URL : ", AjaxService.CONTEXT_PATH + url);
         }
-        return this.httpClient.get(AjaxService.HOST + AjaxService.CONTEXT_PATH + url, this.httpOptions).pipe(
+        return this.httpClient.get(AjaxService.CONTEXT_PATH + url, this.httpOptions).pipe(
             map((response: any) => {
                 return response;
             }),
@@ -72,10 +72,10 @@ export class AjaxService {
         this.getToken();
 
         if (AjaxService.isDebug) {
-            console.log("URL : ", AjaxService.HOST + AjaxService.CONTEXT_PATH + url);
+            console.log("URL : ", AjaxService.CONTEXT_PATH + url);
             console.log("Params : ", body);
         }
-        return this.httpClient.put(AjaxService.HOST + AjaxService.CONTEXT_PATH + url, body).pipe(
+        return this.httpClient.put(AjaxService.CONTEXT_PATH + url, body).pipe(
             map((response: any) => {
                 return response;
             }),
@@ -86,11 +86,11 @@ export class AjaxService {
     doDelete(url: string) {
 
         this.getToken();
-        
+
         if (AjaxService.isDebug) {
-            console.log("URL : ", AjaxService.HOST + AjaxService.CONTEXT_PATH + url);
+            console.log("URL : ", AjaxService.CONTEXT_PATH + url);
         }
-        return this.httpClient.delete(AjaxService.HOST + AjaxService.CONTEXT_PATH + url).pipe(
+        return this.httpClient.delete(AjaxService.CONTEXT_PATH + url).pipe(
             map((response: any) => {
                 return response;
             }),
@@ -101,13 +101,15 @@ export class AjaxService {
     private doHandleError(err) {
         console.log('err: ', err)
         if (err.status == 401) {
-            // window.location.reload();
             if (AjaxService.isDebug) {
                 console.error("Error 401 ", err);
+                // window.location.reload();
+                window.location.href="/#/login"
+                
             }
         } else if (err.status == 415) {
             if (AjaxService.isDebug) {
-                console.error("Error 415 ", err);
+                console.error("Error 415 Method not allow (GET, POST, PUT, DELETE)", err);
             }
         } else if (err.status == 500) {
             if (AjaxService.isDebug) {

@@ -26,24 +26,26 @@ export class AuthService {
 
     login(userModel: UserLoginModel) {
         this.authenticate(userModel).subscribe(token => {
-            this.getUserProfile(token);
+            this.router.navigate(['/dashboard'])
         })
     }
 
     authenticate(userModel: UserLoginModel) {
         return this.httpClient.post(AjaxService.HOST + LOGIN_URL, userModel).pipe(
             map((response: JwtReponseModel) => {
+                localStorage.setItem('token', response.token);
                 return response.token
             }),
             catchError(this.doHandleError)
         );
     }
 
-    getUserProfile(token: string) {
-
+    getUserProfile() {
+        let token = localStorage.getItem('token');
+        console.log('token', token)
         return this.ajax.doGet('/user/profile').subscribe((res:ResponseData<UserProflie>) => {
             console.log('getUserProfile : ', res)
-            localStorage.setItem('token', token);
+           
             this.userProfile = {
                 role: res.data.role,
                 token: token,
@@ -51,6 +53,13 @@ export class AuthService {
             }
             this.store.dispatch(new USERACTION.AddUser(this.userProfile));
         })
+    }
+
+
+    logout(){
+        console.log('logout...')
+        localStorage.removeItem('token');
+        this.getUserProfile();
     }
 
     private doHandleError(err) {
